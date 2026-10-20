@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZDA AI Assistant</title>
+<meta name="description" content="ZDA AI Assistant - Your Smart Assistant, Always Here">
+<meta name="theme-color" content="#060B1C">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ZDA">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060B1C; --bg2:#0A1330; --card:#0E1838; --line:#22346E; --line2:#2B4FB8;
+  --ink:#EAF0FF; --muted:#A9B6D6; --blue:#2F6BFF; --blue2:#6AA6FF; --violet:#7C4DEB;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+body{display:flex;justify-content:center}
+button{font-family:inherit;color:inherit;cursor:pointer}
+.app{position:relative;width:100%;max-width:480px;height:100dvh;overflow:hidden;
+  background:radial-gradient(120% 55% at 50% 0%,#10224F 0%,#060B1C 55%,#040816 100%)}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.active{display:flex}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 12px) 18px 6px}
+.round{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;padding:0}
+.round.b{border:1.5px solid var(--line2);background:var(--bg2)}
+.round.p{border:1.5px solid #5B3FC0;background:#130F33;color:#A98BFF}
+
+/* home */
+.scroll{flex:1;overflow-y:auto;padding:0 18px 12px;-webkit-overflow-scrolling:touch}
+.hero{display:flex;flex-direction:column;align-items:center;margin-top:-26px}
+.hero svg.logo{width:100px;height:100px;filter:drop-shadow(0 0 18px rgba(60,120,255,.55))}
+.hero .name{margin-top:2px;font-size:48px;line-height:1;font-weight:800;letter-spacing:1px;
+  background:linear-gradient(90deg,#2FB4FF 0%,#4C7CFF 55%,#9B6BFF 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{margin-top:6px;font-size:15px;font-weight:700;letter-spacing:5px}
+.hero .tag{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:13.5px;color:#B7C3E3}
+.hero .tag i{display:block;width:34px;height:2px;border-radius:1px;background:#4C6BFF}
+
+.composer{display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:30px;
+  background:var(--bg2);border:1.5px solid #3A63E8;box-shadow:0 0 18px rgba(58,99,232,.28)}
+.composer input{flex:1;min-width:0;height:44px;border:0;outline:0;background:transparent;
+  font-family:inherit;font-size:16px;color:var(--ink)}
+.composer input::placeholder{color:#8392B8}
+.send{width:46px;height:46px;border-radius:23px;border:0;background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.send:disabled{opacity:.5}
+#homeForm{margin-top:16px}
+
+.pill{display:none;margin-top:10px;align-items:center;gap:8px;height:34px;padding:0 6px 0 14px;border-radius:17px;
+  border:1px solid var(--line2);background:var(--bg2);font-size:13px;font-weight:600;width:max-content;max-width:100%}
+.pill.on{display:inline-flex}
+.pill button{width:28px;height:28px;border-radius:14px;border:0;background:transparent;color:var(--muted);padding:0;font-size:16px}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.card{text-align:left;padding:12px;border-radius:18px;border:1.5px solid var(--c);
+  background:linear-gradient(145deg,var(--t) 0%,#0A1330 70%);display:flex;flex-direction:column;gap:3px;min-height:104px}
+.card .row{display:flex;align-items:center;justify-content:space-between}
+.card .ic{width:38px;height:38px;border-radius:11px;background:var(--i);color:#fff;display:flex;align-items:center;justify-content:center}
+.card .ch{color:#9AA8C7}
+.card b{margin-top:5px;font-size:15.5px;font-weight:700}
+.card span.d{font-size:12.5px;line-height:1.35;color:var(--muted)}
+
+.trend-h{margin-top:16px;display:flex;align-items:center;justify-content:space-between;font-size:15.5px;font-weight:700}
+.trend-h .l{display:flex;align-items:center;gap:8px}
+.trend-h a{color:#6AA6FF;font-size:14px;font-weight:600;text-decoration:none;padding:10px 0}
+.trend{display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.trow{display:flex;align-items:center;gap:12px;text-align:left;padding:8px 12px 8px 8px;border-radius:16px;
+  border:1px solid var(--line);background:var(--bg2);font-size:14px;line-height:1.35;min-height:48px}
+.trow .ti{flex:none;width:36px;height:36px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff}
+.trow .tx{flex:1}
+
+nav.tabs{display:flex;justify-content:space-between;padding:8px 12px calc(env(safe-area-inset-bottom) + 10px);
+  border-top:1px solid #1B2A5C;border-radius:26px 26px 0 0;background:#070E26}
+nav.tabs button{flex:1;min-height:52px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;color:#9AA8C7;font-size:12px;font-weight:600}
+nav.tabs button.on{color:#4C9BFF;border-bottom:3px solid #4C9BFF}
+
+/* chat */
+.chead{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 12px) 18px 12px;border-bottom:1px solid #1B2A5C}
+.chead .t{flex:1;min-width:0}
+.chead .t b{display:block;font-size:16px;font-weight:700}
+.chead .t span{font-size:12.5px;color:#7FE0B8}
+.chead svg.mini{width:40px;height:40px;flex:none;filter:drop-shadow(0 0 8px rgba(60,120,255,.5))}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:18px;-webkit-overflow-scrolling:touch}
+.u{align-self:flex-end;max-width:82%;padding:12px 16px;border-radius:20px 20px 6px 20px;
+  background:linear-gradient(135deg,#2459E0,#6D3FE0);color:#fff;font-size:15px;line-height:1.55;
+  white-space:pre-wrap;word-break:break-word}
+.a{display:flex;gap:10px;align-items:flex-start;max-width:94%}
+.av{flex:none;width:30px;height:30px;border-radius:10px;background:#070E26;border:1.5px solid #3A63E8;color:#6AA6FF;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.ab{min-width:0}
+.bub{padding:12px 16px;border-radius:6px 20px 20px 20px;background:var(--card);border:1px solid var(--line);
+  font-size:15px;line-height:1.6;word-break:break-word}
+.bub.err{border-color:#8A3A4A;background:#2A1020;color:#FFC9D3}
+.bub p{margin:0 0 8px}.bub p:last-child{margin:0}
+.bub ul{margin:4px 0 8px;padding-inline-start:20px}.bub li{margin:3px 0}
+.bub code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#07102A;padding:1px 6px;border-radius:6px}
+.bub pre{margin:8px 0;padding:12px;border-radius:12px;background:#07102A;border:1px solid var(--line);overflow-x:auto;direction:ltr;text-align:left}
+.bub pre code{background:transparent;padding:0;font-size:13px;line-height:1.5}
+.bub[dir=rtl],.u[dir=rtl]{font-family:'Noto Nastaliq Urdu','Manrope',serif;line-height:2.1}
+.acts{display:flex;gap:2px;margin-top:2px}
+.acts button{width:44px;height:36px;border:0;background:transparent;color:#9AA8C7;display:flex;align-items:center;justify-content:center;padding:0;border-radius:12px}
+.dots{display:inline-flex;gap:5px;padding:4px 2px}
+.dots i{width:7px;height:7px;border-radius:50%;background:#6AA6FF;animation:b 1.1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+.chips{display:flex;gap:8px;padding:0 18px 8px;overflow-x:auto}
+.chips button{flex:none;height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--line2);background:var(--bg2);font-size:13.5px;font-weight:600}
+#chatForm{padding:4px 18px calc(env(safe-area-inset-bottom) + 16px)}
+
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+  background:#16224D;border:1px solid var(--line2);color:var(--ink);padding:12px 18px;border-radius:16px;font-size:14px;
+  font-weight:600;transition:.25s;max-width:86%;text-align:center;z-index:5}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #6AA6FF;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.dots i{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2FA8FF"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+    <linearGradient id="gZ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2FC4FF"/><stop offset=".6" stop-color="#3B7BFF"/><stop offset="1" stop-color="#9B5CFF"/></linearGradient>
+    <symbol id="zlogo" viewBox="0 0 104 104">
+      <rect x="4" y="4" width="96" height="96" rx="28" fill="#070E26" stroke="url(#gRing)" stroke-width="3.5"/>
+      <path d="M30 34h40L36 70h40" fill="none" stroke="url(#gZ)" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="spark" viewBox="0 0 24 24"><path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8z" fill="#5B9BFF"/><path d="M18 14l.9 2.6 2.6.9-2.6.9L18 21l-.9-2.6-2.6-.9 2.6-.9z" fill="#A98BFF"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- HOME -->
+  <section class="view active" id="home" aria-label="Home">
+    <div class="topbar">
+      <button class="round b" id="menuBtn" aria-label="Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <button class="round p" id="profileBtn" aria-label="Profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+      </button>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <svg class="logo" role="img" aria-label="ZDA logo"><use href="#zlogo"/></svg>
+        <div class="name">ZDA</div>
+        <div class="sub">AI ASSISTANT</div>
+        <div class="tag"><i></i><span>Your Smart Assistant, Always Here</span><i></i></div>
+      </div>
+
+      <form class="composer" id="homeForm" autocomplete="off">
+        <svg width="26" height="26" aria-hidden="true"><use href="#spark"/></svg>
+        <label class="sr" for="homeInput">Ask ZDA anything</label>
+        <input id="homeInput" type="text" placeholder="Ask ZDA anything..." enterkeyhint="send">
+        <button class="send" type="submit" aria-label="Send">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </form>
+      <div class="pill" id="pill"><span id="pillText"></span><button type="button" id="pillX" aria-label="Mode hatao">&#10005;</button></div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="trend-h">
+        <div class="l"><svg width="20" height="20" aria-hidden="true"><use href="#spark"/></svg>Trending Today</div>
+        <a href="#" id="seeAll">See all &#8250;</a>
+      </div>
+      <div class="trend" id="trend"></div>
+    </div>
+
+    <nav class="tabs" aria-label="Main">
+      <button class="on" data-tab="home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l9 8h-2.5v9h-5v-6h-3v6h-5v-9H3z"/></svg>Home</button>
+      <button data-tab="soon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.6"/><path d="M4.5 17l4.5-4.5 3.5 3.5 2.5-2.5 4.5 4"/></svg>Images</button>
+      <button data-tab="library">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12.5l9 5 9-5M3 16.5l9 5 9-5"/></svg>Library</button>
+      <button data-tab="soon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Projects</button>
+      <button data-tab="soon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>More</button>
+    </nav>
+  </section>
+
+  <!-- CHAT -->
+  <section class="view" id="chat" aria-label="Chat">
+    <div class="chead">
+      <button class="round b" id="backBtn" aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <svg class="mini" role="img" aria-label="ZDA logo"><use href="#zlogo"/></svg>
+      <div class="t"><b>ZDA AI Assistant</b><span>Online</span></div>
+      <button class="round p" id="clearBtn" aria-label="Nayi chat">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form class="composer" id="chatForm" autocomplete="off" style="margin:0 18px calc(env(safe-area-inset-bottom) + 16px);padding:6px 6px 6px 14px">
+      <svg width="26" height="26" aria-hidden="true"><use href="#spark"/></svg>
+      <label class="sr" for="chatInput">Ask ZDA anything</label>
+      <input id="chatInput" type="text" placeholder="Ask ZDA anything..." enterkeyhint="send">
+      <button class="send" type="submit" aria-label="Send">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </form>
+  </section>
+
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var KEY = 'zda_chat_v1';
+  var messages = [];
+  var mode = 'general';
+  var busy = false;
+
+  try { messages = JSON.parse(localStorage.getItem(KEY) || '[]'); if (!Array.isArray(messages)) messages = []; } catch (e) { messages = []; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(messages.slice(-40))); } catch (e) {} }
+
+  var ARROW = '<svg class="ch" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  function icon(p) { return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
+
+  var CARDS = [
+    { id: 'images', t: 'Images', d: 'Create stunning images with AI', c: '#2B4FB8', tint: '#14286B', i: '#2F6BFF', soon: true,
+      p: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.6"/><path d="M4.5 17l4.5-4.5 3.5 3.5 2.5-2.5 4.5 4"/>' },
+    { id: 'write', t: 'Write or Edit', d: 'Help with text, writing and content', c: '#17806A', tint: '#0C3B38', i: '#0E9F72', hint: 'Kya likhna ya edit karna hai?',
+      p: '<path d="M6 3h8l4 4v14H6z"/><path d="M9 12h6M9 16h6M9 8h2"/>' },
+    { id: 'web', t: 'Search the Web', d: 'Get the latest information', c: '#5B3FC0', tint: '#261A66', i: '#7C4DEB', soon: true,
+      p: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>' },
+    { id: 'explore', t: 'Explore Ideas', d: 'Brainstorm and get inspired', c: '#A8700F', tint: '#3D2A0A', i: '#C77A00', hint: 'Kis cheez par idea chahiye?',
+      p: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>' },
+    { id: 'code', t: 'Code and Debug', d: 'Write, fix and explain code', c: '#1A7FA8', tint: '#0B3550', i: '#0B93C9', hint: 'Apna code ya sawal likhein...',
+      p: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14"/>' },
+    { id: 'learn', t: 'Learn and Study', d: 'Make learning easier', c: '#B02E64', tint: '#3D1235', i: '#D6336C', hint: 'Kya seekhna ya samajhna hai?',
+      p: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/>' }
+  ];
+
+  var TREND = [
+    { t: 'Give me 5 fun facts about space', bg: '#2F4FD0',
+      p: '<circle cx="12" cy="12" r="3.5"/><path d="M4 12h2M18 12h2M12 4v2M12 18v2"/>' },
+    { t: 'Write a short, motivational story', bg: '#5B3FC0',
+      p: '<path d="M4 20l4-1 11-11a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 7l3 3"/>' }
+  ];
+
+  var CHIPS = ['Aur aasan karo', 'Example do', 'Urdu mein batao'];
+
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(toast._h); toast._h = setTimeout(function () { t.classList.remove('on'); }, 2200);
+  }
+
+  function renderHome() {
+    $('#grid').innerHTML = CARDS.map(function (c) {
+      return '<button class="card" data-id="' + c.id + '" style="--c:' + c.c + ';--t:' + c.tint + ';--i:' + c.i + '">' +
+        '<span class="row"><span class="ic">' + icon(c.p) + '</span>' + ARROW + '</span>' +
+        '<b>' + c.t + '</b><span class="d">' + c.d + '</span></button>';
+    }).join('');
+    $('#trend').innerHTML = TREND.map(function (r, n) {
+      return '<button class="trow" data-n="' + n + '"><span class="ti" style="background:' + r.bg + '">' + icon(r.p) + '</span>' +
+        '<span class="tx">' + r.t + '</span>' + ARROW + '</button>';
+    }).join('');
+    $('#chips').innerHTML = CHIPS.map(function (c) { return '<button type="button">' + c + '</button>'; }).join('');
+  }
+
+  function show(id) {
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === id); });
+    if (id === 'chat') { scrollDown(); }
+  }
+  function scrollDown() { var m = $('#msgs'); m.scrollTop = m.scrollHeight; }
+
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function md(t) {
+    return t.split('```').map(function (p, i) {
+      if (i % 2 === 1) { return '<pre><code>' + esc(p.replace(/^[a-zA-Z0-9+#-]*\n/, '').replace(/\n$/, '')) + '</code></pre>'; }
+      var out = '', inList = false;
+      p.split('\n').forEach(function (raw) {
+        var h = esc(raw).replace(/^#{1,6}\s*(.*)$/, '<strong>$1</strong>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        var m = h.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
+        if (m) { if (!inList) { out += '<ul>'; inList = true; } out += '<li>' + m[1] + '</li>'; }
+        else { if (inList) { out += '</ul>'; inList = false; } if (h.trim()) out += '<p>' + h + '</p>'; }
+      });
+      if (inList) out += '</ul>';
+      return out;
+    }).join('');
+  }
+
+  var COPY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg>';
+
+  function addUser(text) {
+    var d = document.createElement('div'); d.className = 'u'; d.setAttribute('dir', 'auto'); d.textContent = text;
+    $('#msgs').appendChild(d);
+  }
+  function addBot(text, isErr) {
+    var w = document.createElement('div'); w.className = 'a';
+    var av = '<div class="av">ZDA</div>';
+    var b = '<div class="bub' + (isErr ? ' err' : '') + '" dir="auto">' + (isErr ? esc(text) : md(text)) + '</div>';
+    var acts = isErr ? '' : '<div class="acts"><button type="button" class="cp" aria-label="Copy">' + COPY + '</button></div>';
+    w.innerHTML = av + '<div class="ab">' + b + acts + '</div>';
+    if (!isErr) {
+      w.querySelector('.cp').addEventListener('click', function () {
+        if (navigator.clipboard) { navigator.clipboard.writeText(text).then(function () { toast('Copy ho gaya'); }, function () { toast('Copy nahi ho saka'); }); }
+      });
+    }
+    $('#msgs').appendChild(w);
+    return w;
+  }
+  function addTyping() {
+    var w = document.createElement('div'); w.className = 'a'; w.id = 'typing';
+    w.innerHTML = '<div class="av">ZDA</div><div class="ab"><div class="bub"><span class="dots" aria-label="Soch raha hai"><i></i><i></i><i></i></span></div></div>';
+    $('#msgs').appendChild(w); scrollDown();
+  }
+  function renderChat() {
+    $('#msgs').innerHTML = '';
+    if (!messages.length) {
+      addBot('Assalam o Alaikum! Main ZDA hoon. Aap Urdu, Roman Urdu ya English mein kuch bhi poochh sakte hain.');
+    }
+    messages.forEach(function (m) { if (m.role === 'user') addUser(m.text); else addBot(m.text); });
+    scrollDown();
+  }
+
+  async function send(text) {
+    text = (text || '').trim();
+    if (!text || busy) return;
+    busy = true;
+    messages.push({ role: 'user', text: text.slice(0, 4000) });
+    save();
+    show('chat'); renderChat(); addTyping();
+    var btns = document.querySelectorAll('.send'); btns.forEach(function (b) { b.disabled = true; });
+    try {
+      var r = await fetch('/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: messages.slice(-20), mode: mode })
+      });
+      var data = await r.json().catch(function () { return {}; });
+      var t = $('#typing'); if (t) t.remove();
+      if (r.ok && data.reply) {
+        messages.push({ role: 'model', text: data.reply }); save(); addBot(data.reply);
+      } else {
+        messages.pop(); save();
+        addBot(data.error || 'Kuch masla ho gaya. Dobara koshish karein.', true);
+      }
+    } catch (e) {
+      var t2 = $('#typing'); if (t2) t2.remove();
+      messages.pop(); save();
+      addBot('Internet ka masla lagta hai. Check kar ke dobara koshish karein.', true);
+    }
+    busy = false;
+    btns.forEach(function (b) { b.disabled = false; });
+    scrollDown();
+  }
+
+  function setMode(card) {
+    if (!card) { mode = 'general'; $('#pill').classList.remove('on'); $('#homeInput').placeholder = 'Ask ZDA anything...'; return; }
+    mode = card.id;
+    $('#pillText').textContent = card.t;
+    $('#pill').classList.add('on');
+    $('#homeInput').placeholder = card.hint;
+    $('#homeInput').focus();
+  }
+
+  renderHome();
+
+  $('#grid').addEventListener('click', function (e) {
+    var b = e.target.closest('.card'); if (!b) return;
+    var c = CARDS.filter(function (x) { return x.id === b.dataset.id; })[0];
+    if (c.soon) { toast(c.t + ' jaldi aa raha hai'); return; }
+    setMode(c);
+  });
+  $('#pillX').addEventListener('click', function () { setMode(null); });
+  $('#trend').addEventListener('click', function (e) {
+    var b = e.target.closest('.trow'); if (!b) return;
+    send(TREND[+b.dataset.n].t);
+  });
+  $('#seeAll').addEventListener('click', function (e) { e.preventDefault(); toast('Jaldi aa raha hai'); });
+  $('#menuBtn').addEventListener('click', function () { toast('Menu jaldi aa raha hai'); });
+  $('#profileBtn').addEventListener('click', function () { toast('Profile jaldi aa raha hai'); });
+
+  document.querySelector('nav.tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.tab === 'library') { if (messages.length) { show('chat'); renderChat(); } else toast('Abhi koi chat nahi hai'); }
+    else if (b.dataset.tab === 'soon') { toast('Ye hissa jaldi aa raha hai'); }
+  });
+
+  $('#homeForm').addEventListener('submit', function (e) {
+    e.preventDefault(); var i = $('#homeInput'); var v = i.value; i.value = ''; send(v);
+  });
+  $('#chatForm').addEventListener('submit', function (e) {
+    e.preventDefault(); var i = $('#chatInput'); var v = i.value; i.value = ''; send(v);
+  });
+  $('#chips').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (b) send(b.textContent);
+  });
+  $('#backBtn').addEventListener('click', function () { show('home'); });
+  $('#clearBtn').addEventListener('click', function () {
+    messages = []; save(); renderChat(); setMode(null); toast('Nayi chat shuru');
+  });
+})();
+</script>
+</body>
+</html>
