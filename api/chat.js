@@ -4,8 +4,8 @@
 
 const MODELS = [
   process.env.GEMINI_MODEL,
-  'gemini-flash-latest',
   'gemini-2.5-flash',
+  'gemini-flash-latest',
 ].filter(Boolean);
 
 const SYSTEM_PROMPT =
@@ -69,18 +69,26 @@ module.exports = async (req, res) => {
   let lastStatus = 500;
   for (const model of MODELS) {
     try {
-      const r = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemText }] },
-            contents,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
-          }),
-        }
-      );
+      // Pehle "sochne" (thinking) ko band kar ke tez jawab maango.
+      // Agar model ye na maane (400 error) to bagair us ke dobara try karo.
+      const ask = (fast) => {
+        const generationConfig = { temperature: 0.7, maxOutputTokens: 2048 };
+        if (fast) generationConfig.thinkingConfig = { thinkingBudget: 0 };
+        return fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemText }] },
+              contents,
+              generationConfig,
+            }),
+          }
+        );
+      };
+      let r = await ask(true);
+      if (r.status === 400) r = await ask(false);
 
       if (r.status === 404) { lastStatus = 404; continue; } // is naam ka model nahi, agla try karo
 
